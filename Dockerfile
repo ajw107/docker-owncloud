@@ -1,6 +1,6 @@
 FROM linuxserver/baseimage
 
-MAINTAINER Sparklyballs <sparklyballs@linuxserver.io>
+MAINTAINER Sparklyballs <sparklyballs@linuxserver.io>, ajw107 (Alex Wood)
 
 # set version label
 ARG BUILD_DATE
@@ -10,6 +10,8 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 # set owncloud initial install version and mariadb folders
 ENV MYSQL_DIR="/config"
 ENV DATADIR=$MYSQL_DIR/database
+#make life easy for yourself
+ENV TERM=xterm-color
 
 ENV BUILD_APTLIST="php7.0-dev" \
 APTLIST="exim4 exim4-base exim4-config exim4-daemon-light git-core heirloom-mailx jq libaio1 libapr1 \
@@ -67,7 +69,9 @@ apt-get clean -y && \
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/lib/mysql && \
 mkdir -p /var/lib/mysql
 
-# add some files 
+# add some files
+COPY root/ /
+RUN chmod +x /usr/bin/ll
 COPY services/ /etc/service/
 COPY  defaults/ /defaults/
 COPY init/ /etc/my_init.d/
