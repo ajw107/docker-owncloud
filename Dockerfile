@@ -1,4 +1,4 @@
-FROM linuxserver/xenial
+FROM lsiobase/xenial
 
 MAINTAINER Sparklyballs <sparklyballs@linuxserver.io>, ajw107 (Alex Wood)
 
