@@ -4,6 +4,9 @@ ocpath='/var/www/owncloud'
 htuser='abc'
 htgroup='abc'
 rootuser='root'
+#update through apt if possible
+sudo apt-get update
+sudo apt-get -y dist-upgrade
 
 if [ ! -f "/config/www/owncloud/index.php" ]; then
 
