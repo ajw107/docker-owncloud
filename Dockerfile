@@ -1,4 +1,4 @@
-FROM linuxserver/baseimage
+FROM linuxserver/xenial
 
 MAINTAINER Sparklyballs <sparklyballs@linuxserver.io>, ajw107 (Alex Wood)
 
@@ -25,21 +25,28 @@ DB_APTLIST="mariadb-server mysqltuner"
 # add repositories
 RUN \
   # mariadb
-add-apt-repository 'deb http://lon1.mirrors.digitalocean.com/mariadb/repo/10.1/ubuntu trusty main' && \
-apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db && \
+add-apt-repository 'deb http://lon1.mirrors.digitalocean.com/mariadb/repo/10.2/ubuntu xenial main' && \
+apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
  # nginx
-echo "deb http://ppa.launchpad.net/nginx/development/ubuntu trusty main" >> /etc/apt/sources.list.d/nginx.list && \
-echo "deb-src http://ppa.launchpad.net/nginx/development/ubuntu trusty main" >> /etc/apt/sources.list.d/nginx.list && \
-apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 00A6F0A3C300EE8C && \
+#echo "deb http://ppa.launchpad.net/nginx/development/ubuntu trusty main" >> /etc/apt/sources.list.d/nginx.list && \
+#echo "deb-src http://ppa.launchpad.net/nginx/development/ubuntu trusty main" >> /etc/apt/sources.list.d/nginx.list && \
+#apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 00A6F0A3C300EE8C && \
+add-apt-repository -s -y ppa:nginx/development && \
  # php7
-echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu trusty main" >> /etc/apt/sources.list.d/php7.list && \
-echo "deb-src http://ppa.launchpad.net/ondrej/php/ubuntu trusty main" >> /etc/apt/sources.list.d/php7.list && \
-apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 4F4EA0AAE5267A6C && \
+#echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu trusty main" >> /etc/apt/sources.list.d/php7.list && \
+#echo "deb-src http://ppa.launchpad.net/ondrej/php/ubuntu trusty main" >> /etc/apt/sources.list.d/php7.list && \
+#apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 4F4EA0AAE5267A6C && \
+add-apt-repository -s -y ppa:ondrej/php && \
  # python
-add-apt-repository ppa:fkrull/deadsnakes-python2.7 
+add-apt-repository -s -y ppa:fkrull/deadsnakes-python2.7 && \
+ # owncloud
+wget -nv https://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/Release.key -O Release.key && \
+apt-key add - < Release.key && \
+add-apt-repository 'deb http://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/ /'
 
 # install packages
 RUN apt-get update -q && \
+apt-get install -y owncloud
 apt-get install \
 $DB_APTLIST $APTLIST $BUILD_APTLIST -qy && \
 
