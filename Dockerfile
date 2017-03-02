@@ -12,6 +12,7 @@ ENV MYSQL_DIR="/config"
 ENV DATADIR=$MYSQL_DIR/database
 #make life easy for yourself
 ENV TERM=xterm-color
+ENV OWNCLOUD_VER="9.1.4)
 
 ENV BUILD_APTLIST="php7.0-dev" \
 APTLIST="exim4 exim4-base exim4-config exim4-daemon-light git-core heirloom-mailx jq libaio1 libapr1 \
