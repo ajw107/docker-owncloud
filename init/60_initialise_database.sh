@@ -6,7 +6,7 @@ mysqld --init-file="$tempSqlFile" &
 pid="$!"
 RET=1
 while [[ RET -ne 0 ]]; do
-mysql -uroot -e "status" > /dev/null 2>&1
+mysql -uroot -p$DB_PASSWORD -e "status" > /dev/null 2>&1
 RET=$?
 sleep 1
 done
