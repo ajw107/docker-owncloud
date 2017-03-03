@@ -8,11 +8,13 @@ ARG VERSION
 LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 
 # set owncloud initial install version and mariadb folders
+ARG DEBIAN_FRONTEND="noninteractive"
 ENV MYSQL_DIR="/config"
 ENV DATADIR=$MYSQL_DIR/database
 #make life easy for yourself
 ENV TERM=xterm-color
-ENV OWNCLOUD_VER="9.1.4)
+ENV OWNCLOUD_VER="9.1.4"
+ENV DB_PASSWORD=rootpass
 
 ENV BUILD_APTLIST="php7.0-dev" \
 APTLIST="exim4 exim4-base exim4-config exim4-daemon-light git-core heirloom-mailx jq libaio1 libapr1 \
@@ -24,53 +26,54 @@ php-imagick pkg-config smbclient re2c ssl-cert wget" \
 DB_APTLIST="mariadb-server mysqltuner"
 
 # add repositories
+RUN apt-get update -q && \
+apt-get install -y software-properties-common wget debconf-utils
 RUN \
   # mariadb
-add-apt-repository 'deb http://lon1.mirrors.digitalocean.com/mariadb/repo/10.2/ubuntu xenial main' && \
 apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
+add-apt-repository -y 'deb http://lon1.mirrors.digitalocean.com/mariadb/repo/10.2/ubuntu xenial main'
  # nginx
-#echo "deb http://ppa.launchpad.net/nginx/development/ubuntu trusty main" >> /etc/apt/sources.list.d/nginx.list && \
-#echo "deb-src http://ppa.launchpad.net/nginx/development/ubuntu trusty main" >> /etc/apt/sources.list.d/nginx.list && \
-#apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 00A6F0A3C300EE8C && \
-add-apt-repository -s -y ppa:nginx/development && \
+RUN add-apt-repository -s -y ppa:nginx/development
  # php7
 #echo "deb http://ppa.launchpad.net/ondrej/php/ubuntu trusty main" >> /etc/apt/sources.list.d/php7.list && \
 #echo "deb-src http://ppa.launchpad.net/ondrej/php/ubuntu trusty main" >> /etc/apt/sources.list.d/php7.list && \
 #apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 4F4EA0AAE5267A6C && \
-add-apt-repository -s -y ppa:ondrej/php && \
- # python
-add-apt-repository -s -y ppa:fkrull/deadsnakes-python2.7 && \
+RUN LC_ALL=C.UTF-8 add-apt-repository -s -y ppa:ondrej/php
+ # python this repo is now out dates, just use ubuntu
+#RUN add-apt-repository -s -y ppa:fkrull/deadsnakes-python2.7
  # owncloud
-wget -nv https://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/Release.key -O Release.key && \
+RUN wget -nv https://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/Release.key -O Release.key && \
 apt-key add - < Release.key && \
 add-apt-repository 'deb http://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/ /'
 
 # install packages
+RUN echo "mariadb-server mysql-server/root_password password ${DB_PASSWORD}" | debconf-set-selections && \
+echo "mariadb-server mysql-server/root_password_again password ${DB_PASSWORD}" | debconf-set-selections && \
+apt-get install -qy ${DB_APTLIST} -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing
+
 RUN apt-get update -q && \
-apt-get install -y owncloud
-apt-get install \
-$DB_APTLIST $APTLIST $BUILD_APTLIST -qy && \
+apt-get install -qy owncloud $APTLIST $BUILD_APTLIST
 
 # build libsmbclient support
-git clone git://github.com/eduardok/libsmbclient-php.git /tmp/smbclient && \
+RUN git clone git://github.com/eduardok/libsmbclient-php.git /tmp/smbclient && \
 cd /tmp/smbclient && \
 phpize && \
 ./configure && \
 make && \
 make install && \
-echo "extension=smbclient.so" > /etc/php/7.0/mods-available/smbclient.ini && \
+echo "extension=smbclient.so" > /etc/php/7.0/mods-available/smbclient.ini
 
-# install apcu 
-git clone https://github.com/krakjoe/apcu /tmp/apcu && \
+# install apcu
+RUN git clone https://github.com/krakjoe/apcu /tmp/apcu && \
 cd /tmp/apcu && \
 phpize && \
 ./configure && \
 make && \
 make install && \
-echo "extension=apcu.so" > /etc/php/7.0/mods-available/apcu.ini && \
+echo "extension=apcu.so" > /etc/php/7.0/mods-available/apcu.ini
 
-# cleanup 
-cd / && \
+# cleanup
+RUN cd / && \
 apt-get purge --remove $BUILD_APTLIST -y && \
 apt-get autoremove -y && \
 apt-get clean -y && \
