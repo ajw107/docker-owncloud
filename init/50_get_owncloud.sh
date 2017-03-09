@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 
 ocpath='/var/www/owncloud'
 htuser='abc'
@@ -6,7 +6,7 @@ htgroup='abc'
 rootuser='root'
 #update through apt if possible
 sudo apt-get update
-sudo apt-get -y dist-upgrade
+sudo apt-get -qy dist-upgrade
 
 if [ ! -f "/config/www/owncloud/index.php" ]; then
 
@@ -82,5 +82,5 @@ else
     fi
 fi
 
-chown -R abc:abc /config/www/owncloud
+chown -R ${htuser}:${htgroup} /config/www/owncloud
 

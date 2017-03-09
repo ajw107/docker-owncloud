@@ -1,4 +1,5 @@
-#!/bin/bash
-/sbin/setuser abc /usr/bin/mysqld_safe --skip-syslog --binlog-format=MIXED
+#!/usr/bin/with-contenv bash
+sudo -u abc /usr/bin/mysqld_safe --skip-syslog
+#--binlog-format=MIXED
 
 

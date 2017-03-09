@@ -14,24 +14,25 @@ ENV DATADIR=$MYSQL_DIR/database
 #make life easy for yourself
 ENV TERM=xterm-color
 ENV OWNCLOUD_VER="9.1.4"
-ENV DB_PASSWORD=rootpass
+#ENV DB_PASSWORD=rootpass
 
 ENV BUILD_APTLIST="php7.0-dev" \
+#libmysqlclient18 libpcre3-dev libsmbclient.dev nano nginx openssl php-apcu php7.0-bz2 php7.0-cli \
 APTLIST="exim4 exim4-base exim4-config exim4-daemon-light git-core heirloom-mailx jq libaio1 libapr1 \
 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap libdbd-mysql-perl libdbi-perl libfreetype6 \
-libmysqlclient18 libpcre3-dev libsmbclient.dev nano nginx openssl php-apcu php7.0-bz2 php7.0-cli \
+libpcre3-dev libsmbclient.dev nano nginx openssl php-apcu php7.0-bz2 php7.0-cli \
 php7.0-common php7.0-curl php7.0-fpm php7.0-gd php7.0-gmp php7.0-imap php7.0-intl php7.0-ldap \
 php7.0-mbstring php7.0-mcrypt php7.0-mysql php7.0-opcache php7.0-xml php7.0-xmlrpc php7.0-zip \
 php-imagick pkg-config smbclient re2c ssl-cert wget" \
-DB_APTLIST="mariadb-server mysqltuner"
+DB_APTLIST="mysql-server mysqltuner"
 
 # add repositories
 RUN apt-get update -q && \
-apt-get install -y software-properties-common wget debconf-utils
-RUN \
+apt-get install -qy software-properties-common wget debconf-utils sudo
+#RUN \
   # mariadb
-apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
-add-apt-repository -y 'deb http://lon1.mirrors.digitalocean.com/mariadb/repo/10.2/ubuntu xenial main'
+#apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
+#add-apt-repository -y 'deb http://lon1.mirrors.digitalocean.com/mariadb/repo/10.2/ubuntu xenial main'
  # nginx
 RUN add-apt-repository -s -y ppa:nginx/development
  # php7
@@ -42,14 +43,14 @@ RUN LC_ALL=C.UTF-8 add-apt-repository -s -y ppa:ondrej/php
  # python this repo is now out dates, just use ubuntu
 #RUN add-apt-repository -s -y ppa:fkrull/deadsnakes-python2.7
  # owncloud
-RUN wget -nv https://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/Release.key -O Release.key && \
-apt-key add - < Release.key && \
+RUN curl https://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/Release.key | apt-key add - && \
 add-apt-repository 'deb http://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/ /'
 
 # install packages
-RUN echo "mariadb-server mysql-server/root_password password ${DB_PASSWORD}" | debconf-set-selections && \
-echo "mariadb-server mysql-server/root_password_again password ${DB_PASSWORD}" | debconf-set-selections && \
-apt-get install -qy ${DB_APTLIST} -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing
+#RUN echo "mariadb-server mysql-server/root_password password ${DB_PASSWORD}" | debconf-set-selections && \
+#echo "mariadb-server mysql-server/root_password_again password ${DB_PASSWORD}" | debconf-set-selections && \
+#apt-get install -qy ${DB_APTLIST} -o pkg::Options::="--force-confdef" -o pkg::Options::="--force-confold" --fix-missing
+RUN apt-get install -qy ${DB_APTLIST}
 
 RUN apt-get update -q && \
 apt-get install -qy owncloud $APTLIST $BUILD_APTLIST
@@ -83,10 +84,10 @@ mkdir -p /var/lib/mysql
 # add some files
 COPY root/ /
 RUN chmod +x /usr/bin/ll
-COPY services/ /etc/service/
+COPY services/ /etc/services.d/
 COPY  defaults/ /defaults/
-COPY init/ /etc/my_init.d/
-RUN chmod -v +x /etc/service/*/run /etc/my_init.d/*.sh && \
+COPY init/ /etc/cont-init.d/
+RUN chmod -v +x /etc/services.d/*/run /etc/cont-init.d/*.sh && \
 
 # configure fpm for owncloud
 echo "env[PATH] = /usr/local/bin:/usr/bin:/bin" >> /defaults/nginx-fpm.conf

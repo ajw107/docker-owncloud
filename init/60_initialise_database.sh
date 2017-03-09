@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 
 # set start function that creates user and password, used later
 start_mysql(){
@@ -6,7 +6,7 @@ mysqld --init-file="$tempSqlFile" &
 pid="$!"
 RET=1
 while [[ RET -ne 0 ]]; do
-mysql -uroot -p$DB_PASSWORD -e "status" > /dev/null 2>&1
+mysql -uroot -e "status" > /dev/null 2>&1
 RET=$?
 sleep 1
 done
@@ -14,7 +14,7 @@ done
 
 # test for existence of mysql file in datadir and start initialise if not present
 if [ ! -d "$DATADIR/mysql" ]; then
-
+echo "DATADIR: [$DATADIR]"
 # set basic sql command
 tempSqlFile='/tmp/mysql-first-time.sql'
 cat > "$tempSqlFile" <<-EOSQL
@@ -58,7 +58,7 @@ chown -R abc:abc /config/log/mysql /var/run/mysqld
 chmod -R 777 /config/log/mysql /var/run/mysqld
 
 # initialise database structure
-mysql_install_db --datadir="$DATADIR"
+sudo mysqld --initialize-insecure --datadir="${DATADIR}"
 
 # start mysql and apply our sql commands we set above
 start_mysql

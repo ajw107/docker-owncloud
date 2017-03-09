@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 
 if [[ -f /config/keys/cert.key && -f /config/keys/cert.crt ]]; then
 echo "using existing keys in \"/config/keys\""
