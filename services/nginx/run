@@ -1,3 +1,23 @@
 #!/usr/bin/with-contenv bash
-exec /usr/sbin/nginx -c /config/nginx/nginx.conf
+run_cmd() {
+    set +e
 
+    cmd=$@
+    if [ "${DEBUG}" == "TRUE" ]
+    then
+        echo "Executing [$cmd]"
+    fi
+    eval $cmd
+    ret_code=$?
+
+    if [ "$ret_code" == "0" ]
+    then
+        echo "$@ executed successfully"
+    else
+        echo "$@ failed with exit code [$ret_code]"
+    fi
+}
+
+echo "Starting nginx webserver service"
+run_cmd "/usr/sbin/nginx -c \"${CONFIG_DIR}/nginx/nginx.conf\""
+echo "Finishing nginx webserver service"

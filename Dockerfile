@@ -9,26 +9,31 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 
 # set owncloud initial install version and mariadb folders
 ARG DEBIAN_FRONTEND="noninteractive"
-ENV MYSQL_DIR="/config"
-ENV DATADIR=$MYSQL_DIR/database
+ENV DEBUG="TRUE"
+ENV USER="abc"
+ENV GROUP="abc"
+ENV OC_DIR="/var/www/owncloud"
+ENV CONFIG_DIR="/config"
+ENV MYSQL_DIR="${CONFIG_DIR}/database"
+ENV DATA_DIR="/data"
 #make life easy for yourself
 ENV TERM=xterm-color
 ENV OWNCLOUD_VER="9.1.4"
-#ENV DB_PASSWORD=rootpass
+ENV DB_PASSWORD="owncloud"
 
-ENV BUILD_APTLIST="php7.0-dev" \
+ENV BUILD_APTLIST="php7.0-dev"
 #libmysqlclient18 libpcre3-dev libsmbclient.dev nano nginx openssl php-apcu php7.0-bz2 php7.0-cli \
-APTLIST="exim4 exim4-base exim4-config exim4-daemon-light git-core heirloom-mailx jq libaio1 libapr1 \
+ENV APTLIST="exim4 exim4-base exim4-config exim4-daemon-light git-core heirloom-mailx jq libaio1 libapr1 \
 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap libdbd-mysql-perl libdbi-perl libfreetype6 \
 libpcre3-dev libsmbclient.dev nano nginx openssl php-apcu php7.0-bz2 php7.0-cli \
 php7.0-common php7.0-curl php7.0-fpm php7.0-gd php7.0-gmp php7.0-imap php7.0-intl php7.0-ldap \
 php7.0-mbstring php7.0-mcrypt php7.0-mysql php7.0-opcache php7.0-xml php7.0-xmlrpc php7.0-zip \
-php-imagick pkg-config smbclient re2c ssl-cert wget" \
-DB_APTLIST="mysql-server mysqltuner"
+php-imagick pkg-config smbclient re2c ssl-cert"
+ENV DB_APTLIST="mysql-server mysqltuner"
 
 # add repositories
 RUN apt-get update -q && \
-apt-get install -qy software-properties-common wget debconf-utils sudo
+apt-get install -qy software-properties-common wget debconf-utils sudo cron
 #RUN \
   # mariadb
 #apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 && \
@@ -40,7 +45,7 @@ RUN add-apt-repository -s -y ppa:nginx/development
 #echo "deb-src http://ppa.launchpad.net/ondrej/php/ubuntu trusty main" >> /etc/apt/sources.list.d/php7.list && \
 #apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 4F4EA0AAE5267A6C && \
 RUN LC_ALL=C.UTF-8 add-apt-repository -s -y ppa:ondrej/php
- # python this repo is now out dates, just use ubuntu
+ # python this repo is now out dated, just use ubuntu
 #RUN add-apt-repository -s -y ppa:fkrull/deadsnakes-python2.7
  # owncloud
 RUN curl https://download.owncloud.org/download/repositories/9.1/Ubuntu_16.04/Release.key | apt-key add - && \
@@ -96,5 +101,5 @@ echo "env[PATH] = /usr/local/bin:/usr/bin:/bin" >> /defaults/nginx-fpm.conf
 EXPOSE 443
 
 # set volumes
-VOLUME /config /data
+VOLUME ${CONFIG_DIR} ${DATA_DIR}
 

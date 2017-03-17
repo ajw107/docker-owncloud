@@ -18,6 +18,7 @@ run_cmd() {
     fi
 }
 
-echo "Starting php fpm service"
-run_cmd "/usr/sbin/php-fpm7.0 -F -y \"${CONFIG_DIR}/nginx/nginx-fpm.conf\""
-echo "Finishing php fpm service"
+echo "Starting mysql service"
+run_cmd "sudo -u ${USER} /usr/bin/mysqld_safe --skip-syslog"
+#--binlog-format=MIXED
+echo "Finishing mysql service"
